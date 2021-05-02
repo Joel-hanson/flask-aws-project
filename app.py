@@ -3,12 +3,15 @@ import boto3
 
 from flask import request, jsonify
 from utils import get_instance_status, get_running_instances
+
 app = flask.Flask(__name__)
 app.config.from_pyfile("settings.py")
 
-session = boto3.session.Session(region_name=app.config.get("DEFAULT_REGION"), profile_name=app.config.get("KEYNAME"))
+session = boto3.session.Session(
+    region_name=app.config.get("DEFAULT_REGION"), profile_name=app.config.get("KEYNAME")
+)
 
-new_instance_image_data = '''#!/bin/bash
+new_instance_image_data = """#!/bin/bash
 set -e -x
 sudo apt-get -y install
 sudo apt-get -y upgrade
@@ -40,15 +43,16 @@ git clone https://github.com/Joel-hanson/nginx-docker.git /tmp/nginx-docker
 cd /tmp/nginx-docker
 sudo cp supervisor.conf /etc/supervisor/conf.d/
 sudo service supervisor restart
-'''
+"""
 
-custom_image_user_data = '''#!/bin/bash
+custom_image_user_data = """#!/bin/bash
 set -e -x
 
 git clone https://github.com/Joel-hanson/nginx-docker.git /tmp/nginx-docker
 
 sudo service supervisor restart
-'''
+"""
+
 
 @app.route("/", methods=["GET"])
 def home():
@@ -84,9 +88,7 @@ def create_instance():
     instance_type = request.args.get(
         "instance_type", app.config.get("DEFAULT_INSTANCE_TYPE")
     )
-    use_custom_image = request.args.get(
-        "use_custom_image", False
-    )
+    use_custom_image = request.args.get("use_custom_image", False)
     if use_custom_image:
         print("custom image")
         image_id = app.config.get("CUSTOM_IMAGE_ID")
@@ -101,7 +103,7 @@ def create_instance():
         MinCount=1,
         MaxCount=1,
         InstanceType=instance_type,
-        SecurityGroups=['default'],
+        SecurityGroups=["default"],
         UserData=user_data,
         KeyName=app.config.get("KEYNAME"),
     )
@@ -123,9 +125,7 @@ def status_all():
     Return:
         Status of the instance or instances will be returned based on the request input response (JSON)
     """
-    instance_id = request.args.get(
-        "instance_id"
-    )
+    instance_id = request.args.get("instance_id")
     instances_status = get_instance_status(instance_id)
     return jsonify(instances_status)
 

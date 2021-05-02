@@ -5,6 +5,7 @@ from settings import DEFAULT_REGION, KEYNAME
 
 session = boto3.session.Session(region_name=DEFAULT_REGION, profile_name=KEYNAME)
 
+
 def get_public_ip(instance_ids):
     ec2_client = session.client("ec2")
     reservations = ec2_client.describe_instances(InstanceIds=instance_ids).get(
@@ -39,7 +40,9 @@ def get_running_instances():
 def get_instance_status(instance_id):
     ec2_client = session.client("ec2")
     if instance_id:
-        reservations = ec2_client.describe_instances(InstanceIds=[instance_id]).get("Reservations")
+        reservations = ec2_client.describe_instances(InstanceIds=[instance_id]).get(
+            "Reservations"
+        )
     else:
         reservations = ec2_client.describe_instances().get("Reservations")
 
@@ -48,15 +51,15 @@ def get_instance_status(instance_id):
         for instance in reservation["Instances"]:
             instance_id = instance["InstanceId"]
             instance_type = instance["InstanceType"]
-            instance_status = instance["State"]['Name']
+            instance_status = instance["State"]["Name"]
             public_dns_name = instance["PublicDnsName"]
             link_details = "Server is spinning up"
-            if instance_status =="running":
+            if instance_status == "running":
                 link_details = "Server is up and docker is spinning up right now"
                 try:
-                    response = requests.get(f'http://{public_dns_name}')
+                    response = requests.get(f"http://{public_dns_name}")
                     if response.status_code == 200:
-                        link_details = f'The site is up and running. please visit http://{public_dns_name}'
+                        link_details = f"The site is up and running. please visit http://{public_dns_name}"
                 except:
                     link_details = "Server is up and docker is spinning up right now"
             elif instance_status == "terminated":
@@ -65,7 +68,7 @@ def get_instance_status(instance_id):
                 link_details = "Server is shutting down"
             else:
                 link_details = ""
-            
+
             instances_status.append(
                 f"{instance_id}, {instance_type}, {instance_status}, {link_details}"
             )
@@ -92,5 +95,7 @@ def create_key_pair():
     private_key = key_pair["KeyMaterial"]
 
     # write private key to file with 400 permissions
-    with os.fdopen(os.open("/tmp/aws_ec2_key.pem", os.O_WRONLY | os.O_CREAT, 0o400), "w+") as handle:
+    with os.fdopen(
+        os.open("/tmp/aws_ec2_key.pem", os.O_WRONLY | os.O_CREAT, 0o400), "w+"
+    ) as handle:
         handle.write(private_key)
