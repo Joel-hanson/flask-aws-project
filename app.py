@@ -62,10 +62,13 @@ def home():
         </h3>
         <ul>
         <li>
-            For creating a new instance please send a request to the API /api/create
+            Creating a new instance can be done using the API at `/api/create` Both the GET and POST request works
+            You specify the instance type by providing the query param `instance_type`
         </li>
         <li>
-            The status of the current instance can be fetched using the /api/status API
+            The status of the current instance can be fetched using the API `/api/status`
+            The API returns the status of all the instances
+            To get the status of a perticular instance please provide the instance id using the query param instance_id
         </li>
         </ul>
     """
