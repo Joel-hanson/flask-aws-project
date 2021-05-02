@@ -71,6 +71,7 @@ def home():
             To get the status of a perticular instance please provide the instance id using the query param instance_id
         </li>
         </ul>
+        Please refer readme md for details
     """
 
 
